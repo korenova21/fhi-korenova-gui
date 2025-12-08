@@ -1,0 +1,22 @@
+<table class="table">
+  <thead>
+  <tr>
+    @for (column of columns(); track $index) {
+      <th scope="col">{{column.name}}</th>
+    }
+  </tr>
+  </thead>
+  <tbody>
+    @for (row of rows(); track $index) {
+      <tr>
+        @for (column of columns(); track $index) {
+          <td>
+            {{column.value(row)}}
+          </td>
+        }
+      </tr>
+    } @empty {
+      No data available.
+    }
+  </tbody>
+</table>

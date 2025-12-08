@@ -1,0 +1,9 @@
+<app-page-title title="Packages"></app-page-title>
+<app-card title="List of Packages">
+  @if (packages(); as packages) {
+    <app-table [rows]="packages" [columns]="columns"></app-table>
+  } @else {
+    <app-loader></app-loader>
+  }
+</app-card>
+
