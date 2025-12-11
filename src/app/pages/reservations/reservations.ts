@@ -41,11 +41,11 @@ export default class Reservations {
   originalCode: string | null = null;
 
   columns: Column<Reservation>[] = [
-    {name: '#', value: row => row.code},
+    {name: 'ID', value: row => row.code},
     {name: 'Name', value: row => row.guest.name},
     {name: 'Room', value: row => row.room.cislo},
     {name: 'Nights', value: row => row.nights},
-    {name: 'NoP', value: row => row.party},
+    {name: 'Pax', value: row => row.party},
     {
       name: 'Actions',
       actions: [
