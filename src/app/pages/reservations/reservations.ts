@@ -1,89 +1,129 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, signal, WritableSignal} from '@angular/core';
+import {FormsModule} from '@angular/forms'; // Dôležité
 import {PageTitle} from '../../components/page-title/page-title';
 import {Card} from '../../components/card/card';
 import {Table} from '../../components/table/table';
 import {Loader} from '../../components/loader/loader';
-import {toSignal} from '@angular/core/rxjs-interop';
+import {Reservation} from '../../models/reservation.model';
+import {Room} from '../../models/room.model';
+import {Person} from '../../models/person.model';
 import {Column} from '../../models/column.model';
 import {ReservationsService} from '../../services/reservations.service';
-import {Reservation} from '../../models/reservation.model';
-import {ActionType, ActionEvent} from '../../models/action.model'; // <-- NOVÝ IMPORT
-import {Router} from '@angular/router'; // <-- NOVÝ IMPORT (pre navigáciu)
+import {RoomsService} from '../../services/rooms.service';     // <-- Potrebujeme načítať izby
+import {PersonsService} from '../../services/persons.service'; // <-- Potrebujeme načítať hostí
+import {ActionEvent, ActionType} from '../../models/action.model';
+import {forkJoin} from 'rxjs';
 
 @Component({
   selector: 'app-reservations',
-  imports: [
-    PageTitle,
-    Card,
-    Loader,
-    Table
-  ],
+  standalone: true,
+  imports: [PageTitle, Card, Table, Loader, FormsModule],
   templateUrl: './reservations.html',
 })
 export default class Reservations {
   private reservationsService = inject(ReservationsService);
-  private router = inject(Router);
+  private roomsService = inject(RoomsService);
+  private personsService = inject(PersonsService);
 
-  // Musíme znovu načítať dáta po akcii, preto môžeme použiť reaktívnu stratégiu
-  // Ale pre jednoduchosť to necháme zatiaľ takto, len pridáme metódu reload
-  reservations = toSignal(this.reservationsService.getReservations());
+  viewMode = signal<'table' | 'form'>('table');
 
-  // 1. Upravená definícia stĺpcov s Akciami
+  // Hlavné dáta
+  reservations: WritableSignal<Reservation[] | undefined> = signal(undefined);
+
+  // Zoznamy pre Dropdowny (Select)
+  roomsList: Room[] = [];
+  personsList: Person[] = [];
+
+  // Dáta formulára
+  // Ukladáme si ID vybranej izby a hosťa, nie celé objekty, aby sa to ľahšie posielalo
+  activeReservation: any = {};
+
   columns: Column<Reservation>[] = [
     {name: '#', value: row => row.code},
     {name: 'Name', value: row => row.guest.name},
     {name: 'Room', value: row => row.room.cislo},
     {name: 'Nights', value: row => row.nights},
     {name: 'NoP', value: row => row.party},
-    // NOVÝ STĹPEC AKCIÍ
     {
-      name: 'Akcie',
+      name: 'Actions',
       actions: [
-        { label: 'Change', type: ActionType.Change, cssClass: 'btn-sm btn-outline-primary' },
-        { label: 'Delete', type: ActionType.Delete, cssClass: 'btn-sm btn-outline-danger' }
+        { label: 'Delete', type: ActionType.Delete, cssClass: 'btn btn-sm btn-outline-danger' }
+        // Change pre rezervácie zatiaľ vynecháme pre jednoduchosť, alebo dorobíme neskôr
       ]
     }
   ];
 
-  // 2. Handler pre akcie z riadku
-  onRowAction(event: ActionEvent<Reservation>): void {
-    const reservation = event.row;
+  constructor() {
+    this.loadData();
+  }
 
-    switch (event.type) {
-      case ActionType.Change:
-        console.log(`Open form for editing reservation ${reservation.code}`);
-        // TODO: Implementovať navigáciu na editačnú stránku
-        // this.router.navigate(['/reservations', reservation.code, 'edit']);
-        break;
+  loadData() {
+    // Načítame naraz Rezervácie, Izby aj Ľudí
+    forkJoin({
+      reservations: this.reservationsService.getReservations(),
+      rooms: this.roomsService.getRooms(),
+      persons: this.personsService.getPersons()
+    }).subscribe({
+      next: (res) => {
+        this.reservations.set(res.reservations);
+        this.roomsList = res.rooms;
+        this.personsList = res.persons;
+      },
+      error: (err) => console.error(err)
+    });
+  }
 
-      case ActionType.Delete:
-        if (confirm(`Naozaj chcete vymazať rezerváciu ${reservation.code}?`)) {
-          this.deleteReservation(reservation.code);
-        }
-        break;
+  openForm() {
+    // Validácia: Nedovolíme otvoriť formulár, ak chýbajú dáta
+    if (this.roomsList.length === 0 || this.personsList.length === 0) {
+      alert('Cannot create reservation: You need at least one Room and one Guest created first.');
+      return;
     }
+
+    this.activeReservation = {
+      code: '',
+      roomId: this.roomsList[0].id, // Predvyberieme prvé
+      guestId: this.personsList[0].id, // Predvyberieme prvé
+      nights: 1,
+      party: '1 Adult'
+    };
+    this.viewMode.set('form');
   }
 
-  // 3. Handler pre "+New"
-  openNewReservationForm(): void {
-    console.log('Open form for new reservation');
-    // TODO: Implementovať navigáciu na pridávaciu stránku
-    // this.router.navigate(['/reservations/new']);
+  closeForm() {
+    this.viewMode.set('table');
+    this.activeReservation = {};
   }
 
-  // 4. Implementácia mazania
-  private deleteReservation(code: string): void {
-    this.reservationsService.deleteReservation(code).subscribe({
+  saveReservation() {
+    // Pripravíme objekt pre backend
+    // Backend očakáva: { code, roomId, guestId, nights, party }
+    const payload = {
+      code: this.activeReservation.code,
+      roomId: Number(this.activeReservation.roomId),
+      guestId: Number(this.activeReservation.guestId),
+      nights: this.activeReservation.nights,
+      party: this.activeReservation.party
+    };
+
+    // Vytvoríme (update zatiaľ neriešime)
+    this.reservationsService.createReservation(payload).subscribe({
       next: () => {
-        console.log(`Reservation ${code} deleted.`);
-        // Po úspešnom vymazaní MUSÍŠ znovu načítať zoznam
-        // Zatiaľ to necháme na manuálne F5, ale ideálne by tu mala byť reaktivita (napr. znovunačítanie streamu)
-        window.location.reload();
+        this.loadData();
+        this.closeForm();
       },
       error: (err) => {
-        console.error('Error deleting reservation:', err);
-        alert('Chyba pri mazaní rezervácie. Skontrolujte konzolu.');
+        alert('Error creating reservation');
+        console.error(err);
       }
     });
+  }
+
+  onRowAction(event: ActionEvent<Reservation>) {
+    if (event.type === ActionType.Delete) {
+      if (confirm(`Delete reservation ${event.row.code}?`)) {
+        this.reservationsService.deleteReservation(event.row.code).subscribe(() => this.loadData());
+      }
+    }
   }
 }

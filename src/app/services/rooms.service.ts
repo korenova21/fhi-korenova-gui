@@ -3,6 +3,8 @@ import {HttpClient} from '@angular/common/http';
 import {Room} from '../models/room.model';
 import {API_URL} from '../consts/app.consts';
 
+// ... existujúce importy
+
 @Injectable({
   providedIn: 'root',
 })
@@ -12,5 +14,19 @@ export class RoomsService {
 
   getRooms() {
     return this.http.get<Room[]>(`${API_URL}/rooms`);
+  }
+
+  createRoom(room: Partial<Room>) {
+    return this.http.post<string>(`${API_URL}/rooms`, room);
+  }
+
+  // NOVÉ: Vymazanie izby
+  deleteRoom(id: number) {
+    return this.http.delete<void>(`${API_URL}/rooms/${id}`);
+  }
+
+  // NOVÉ: Úprava izby
+  updateRoom(id: number, roomData: Partial<Room>) {
+    return this.http.put<void>(`${API_URL}/rooms/${id}`, roomData);
   }
 }

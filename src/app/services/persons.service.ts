@@ -13,4 +13,19 @@ export class PersonsService {
   getPersons() {
     return this.http.get<Person[]>(`${API_URL}/persons`);
   }
+
+  // NOVÉ
+  createPerson(person: Partial<Person>) {
+    return this.http.post<number>(`${API_URL}/persons`, person);
+  }
+
+  // NOVÉ
+  deletePerson(id: number) {
+    return this.http.delete<void>(`${API_URL}/persons/${id}`);
+  }
+
+  // NOVÉ (pre Change tlačidlo)
+  updatePerson(id: number, person: Partial<Person>) {
+    return this.http.put<void>(`${API_URL}/persons/${id}`, person);
+  }
 }

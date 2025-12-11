@@ -1,10 +1,11 @@
-import {Component, input, output, Input} from '@angular/core';
+import {Component, input, output} from '@angular/core'; // Pridaný 'output'
 import {Column} from '../../models/column.model';
-import {ActionEvent, ColumnAction} from '../../models/action.model'; // <-- NOVÝ IMPORT
+import {ActionEvent, ColumnAction} from '../../models/action.model'; // NOVÝ IMPORT
 
 @Component({
   selector: 'app-table',
   imports: [],
+  standalone: true, // Predpokladám, že používaš standalone, ak nie, pridaj do NgModule
   templateUrl: './table.html',
 })
 export class Table<T> {
@@ -12,12 +13,11 @@ export class Table<T> {
   rows = input.required<T[]>();
   columns = input.required<Column<T>[]>();
 
-  // NOVÉ: Definovanie, že komponent Table bude odosielať udalosť 'rowAction'
+  // NOVÉ: Definovanie eventu, ktorý sa odosiela pri kliknutí na akčné tlačidlo
   rowAction = output<ActionEvent<T>>();
 
-  // NOVÉ: Funkcia, ktorá sa zavolá pri kliknutí na tlačidlo v riadku
+  // NOVÉ: Handler pre kliknutie na tlačidlo v riadku
   onActionClick(row: T, action: ColumnAction): void {
-    // Odosielame udalosť s dátami celého riadku (row) a typom akcie (type)
     this.rowAction.emit({
       type: action.type,
       row: row

@@ -17,6 +17,6 @@ export class Navbar {
   menuItems: MenuItem[] = [
     { label: 'Rooms', routerLink: 'rooms' },
     { label: 'Reservations', routerLink: 'reservations' },
-    { label: 'Add reservation', routerLink: 'add_reservation' }
+    { label: 'Guests', routerLink: 'guests' }
   ];
 }

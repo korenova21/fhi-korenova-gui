@@ -1,8 +1,71 @@
-<app-page-title title="Rooms"></app-page-title>
-<app-card title="List of Rooms">
-  @if (rooms(); as rooms) {
-    <app-table [rows]="rooms" [columns]="columns"></app-table>
-  } @else {
-    <app-loader></app-loader>
+<app-page-title title="Rooms Management"></app-page-title>
+
+<app-card title="Rooms Management">
+  @if (viewMode() === 'table') {
+
+    @if (rooms(); as data) {
+      <div style="position: relative; padding-bottom: 60px;">
+        <app-table
+          [rows]="data"
+          [columns]="columns"
+          (rowAction)="onRowAction($event)">
+        </app-table>
+
+        <button
+          class="btn btn-success"
+          style="position: absolute; bottom: 0; right: 0;"
+          (click)="openForm()">
+          + New Room
+        </button>
+      </div>
+    } @else {
+      <app-loader></app-loader>
+    }
+
+  }
+
+  @else {
+    <div class="p-3">
+      <h3>{{ activeRoom.id ? 'Edit Room' : 'Create New Room' }}</h3>
+
+      <form (ngSubmit)="saveRoom()">
+
+        <div class="mb-3">
+          <label class="form-label">Room Number</label>
+          <input type="text" class="form-control" [(ngModel)]="activeRoom.cislo" name="cislo" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Type</label>
+          <select class="form-select" [(ngModel)]="activeRoom.type" name="type" required>
+            <option value="single">Single</option>
+            <option value="double">Double</option>
+            <option value="suite">Suite</option>
+            <option value="deluxe">Deluxe</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Price</label>
+          <input type="text" class="form-control" [(ngModel)]="activeRoom.price" name="price" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Capacity</label>
+          <input type="number" class="form-control" [(ngModel)]="activeRoom.capacity" name="capacity" required>
+        </div>
+
+        <div class="mb-3 form-check">
+          <input type="checkbox" class="form-check-input" id="occupiedCheck" [(ngModel)]="activeRoom.isOccupied" name="isOccupied">
+          <label class="form-check-label" for="occupiedCheck">Is Occupied?</label>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Room</button>
+        </div>
+
+      </form>
+    </div>
   }
 </app-card>

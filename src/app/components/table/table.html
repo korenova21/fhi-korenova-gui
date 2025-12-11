@@ -18,7 +18,7 @@
               @for (action of column.actions; track action.type) {
                 <button
                   (click)="onActionClick(row, action)"
-                  [class]="action.cssClass || 'btn btn-secondary me-1'"
+                  [class]="action.cssClass || 'btn btn-secondary btn-sm me-1'"
                   type="button"
                 >
                   {{ action.label }}

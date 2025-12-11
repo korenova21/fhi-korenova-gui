@@ -1,24 +1,71 @@
-<app-page-title title="Reservations"></app-page-title>
-<app-card title="List of Reservations">
-  @if (reservations(); as reservations) {
-    <div style="position: relative;">
+<app-page-title title="Reservations Management"></app-page-title>
 
-      <app-table
-        [rows]="reservations"
-        [columns]="columns"
-        (rowAction)="onRowAction($event)">
-      </app-table>
+<app-card title="Reservations Management">
+  @if (viewMode() === 'table') {
+    @if (reservations(); as data) {
+      <div style="position: relative; padding-bottom: 60px;">
+        <app-table
+          [rows]="data"
+          [columns]="columns"
+          (rowAction)="onRowAction($event)">
+        </app-table>
 
-      <button
-        (click)="openNewReservationForm()"
-        style="position: absolute; bottom: -50px; right: 0;"
-        class="btn btn-primary"
-      >
-        + New Reservation
-      </button>
-
-    </div>
+        <button class="btn btn-success"
+                style="position: absolute; bottom: 0; right: 0;"
+                (click)="openForm()">
+          + New Reservation
+        </button>
+      </div>
+    } @else {
+      <app-loader></app-loader>
+    }
   } @else {
-    <app-loader></app-loader>
+    <div class="p-3">
+      <h3>New Reservation</h3>
+      <form (ngSubmit)="saveReservation()">
+
+        <div class="mb-3">
+          <label class="form-label">Reservation Code</label>
+          <input type="text" class="form-control" [(ngModel)]="activeReservation.code" name="code" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Select Room</label>
+          <select class="form-select" [(ngModel)]="activeReservation.roomId" name="roomId" required>
+            @for (room of roomsList; track room.id) {
+              <option [value]="room.id">
+                Room {{ room.cislo }} ({{ room.type }} - {{ room.price }}€)
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Select Guest</label>
+          <select class="form-select" [(ngModel)]="activeReservation.guestId" name="guestId" required>
+            @for (person of personsList; track person.id) {
+              <option [value]="person.id">
+                {{ person.name }} ({{ person.email }})
+              </option>
+            }
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Nights</label>
+          <input type="number" class="form-control" [(ngModel)]="activeReservation.nights" name="nights" required min="1">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Party info</label>
+          <input type="text" class="form-control" [(ngModel)]="activeReservation.party" name="party" required>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create Reservation</button>
+        </div>
+      </form>
+    </div>
   }
 </app-card>
