@@ -1,4 +1,9 @@
+import { ColumnAction } from './action.model';
+
 export interface Column<T> {
   name: string;
-  value: (row: T) => string | number;
+  // Buď je stĺpec hodnota...
+  value?: (row: T) => any;
+  // ...alebo je to stĺpec s akciami.
+  actions?: ColumnAction[];
 }

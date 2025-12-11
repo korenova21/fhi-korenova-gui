@@ -1,0 +1,24 @@
+<app-page-title title="Reservations"></app-page-title>
+<app-card title="List of Reservations">
+  @if (reservations(); as reservations) {
+    <div style="position: relative;">
+
+      <app-table
+        [rows]="reservations"
+        [columns]="columns"
+        (rowAction)="onRowAction($event)">
+      </app-table>
+
+      <button
+        (click)="openNewReservationForm()"
+        style="position: absolute; bottom: -50px; right: 0;"
+        class="btn btn-primary"
+      >
+        + New Reservation
+      </button>
+
+    </div>
+  } @else {
+    <app-loader></app-loader>
+  }
+</app-card>

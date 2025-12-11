@@ -1,0 +1,8 @@
+<app-page-title title="Rooms"></app-page-title>
+<app-card title="List of Rooms">
+  @if (rooms(); as rooms) {
+    <app-table [rows]="rooms" [columns]="columns"></app-table>
+  } @else {
+    <app-loader></app-loader>
+  }
+</app-card>

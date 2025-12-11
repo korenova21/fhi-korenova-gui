@@ -15,7 +15,8 @@ export class Navbar {
   protected readonly APP_NAME = APP_NAME;
 
   menuItems: MenuItem[] = [
-    { label: 'Persons', routerLink: 'persons' },
-    { label: 'Packages', routerLink: 'packages' }
+    { label: 'Rooms', routerLink: 'rooms' },
+    { label: 'Reservations', routerLink: 'reservations' },
+    { label: 'Add reservation', routerLink: 'add_reservation' }
   ];
 }

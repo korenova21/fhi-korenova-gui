@@ -11,7 +11,20 @@
       <tr>
         @for (column of columns(); track $index) {
           <td>
-            {{column.value(row)}}
+            @if (column.value) {
+              {{column.value(row)}}
+            }
+            @else if (column.actions) {
+              @for (action of column.actions; track action.type) {
+                <button
+                  (click)="onActionClick(row, action)"
+                  [class]="action.cssClass || 'btn btn-secondary me-1'"
+                  type="button"
+                >
+                  {{ action.label }}
+                </button>
+              }
+            }
           </td>
         }
       </tr>

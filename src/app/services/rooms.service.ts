@@ -1,16 +1,16 @@
 import {inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
+import {Room} from '../models/room.model';
 import {API_URL} from '../consts/app.consts';
-import {Package} from '../models/package.model';
 
 @Injectable({
   providedIn: 'root',
 })
-export class PackagesService {
+export class RoomsService {
 
   private http = inject(HttpClient)
 
-  getPackages() {
-    return this.http.get<Package[]>(`${API_URL}/packages`);
+  getRooms() {
+    return this.http.get<Room[]>(`${API_URL}/rooms`);
   }
 }

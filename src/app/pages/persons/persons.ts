@@ -26,6 +26,6 @@ export default class Persons {
   columns: Column<Person>[] = [
     {name: '#', value: row => row.id},
     {name: 'Name', value: row => row.name},
-    {name: 'Address', value: row => row.address},
+    {name: 'Email', value: row => row.email},
   ];
 }
