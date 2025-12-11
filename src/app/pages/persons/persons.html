@@ -1,8 +1,0 @@
-<app-page-title title="Persons"></app-page-title>
-<app-card title="List of Persons">
-  @if (persons(); as persons) {
-    <app-table [rows]="persons" [columns]="columns"></app-table>
-  } @else {
-    <app-loader></app-loader>
-  }
-</app-card>

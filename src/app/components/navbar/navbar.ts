@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
-import {APP_NAME} from '../../consts/app.consts';
-import {MenuItem} from '../../models/menu-item.model';
+import {Component} from '@angular/core';
 import {RouterLink, RouterLinkActive} from '@angular/router';
+import {MenuItem} from '../../models/menu-item.model';
+import {APP_NAME} from '../../consts/app.consts';
 
 @Component({
   selector: 'app-navbar',
@@ -13,10 +13,10 @@ import {RouterLink, RouterLinkActive} from '@angular/router';
 })
 export class Navbar {
   protected readonly APP_NAME = APP_NAME;
-
   menuItems: MenuItem[] = [
     { label: 'Rooms', routerLink: 'rooms' },
     { label: 'Reservations', routerLink: 'reservations' },
-    { label: 'Guests', routerLink: 'guests' }
+    { label: 'Guests', routerLink: 'guests' }, // <--- Tu musí byť 'guests', aby to sedelo s app.routes.ts
   ];
+
 }

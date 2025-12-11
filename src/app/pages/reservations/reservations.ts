@@ -38,6 +38,8 @@ export default class Reservations {
   // Ukladáme si ID vybranej izby a hosťa, nie celé objekty, aby sa to ľahšie posielalo
   activeReservation: any = {};
 
+  originalCode: string | null = null;
+
   columns: Column<Reservation>[] = [
     {name: '#', value: row => row.code},
     {name: 'Name', value: row => row.guest.name},
@@ -47,6 +49,7 @@ export default class Reservations {
     {
       name: 'Actions',
       actions: [
+        { label: 'Change', type: ActionType.Change, cssClass: 'btn btn-sm btn-outline-primary me-1' },
         { label: 'Delete', type: ActionType.Delete, cssClass: 'btn btn-sm btn-outline-danger' }
         // Change pre rezervácie zatiaľ vynecháme pre jednoduchosť, alebo dorobíme neskôr
       ]
@@ -73,20 +76,42 @@ export default class Reservations {
     });
   }
 
-  openForm() {
-    // Validácia: Nedovolíme otvoriť formulár, ak chýbajú dáta
+// Funkcia teraz prijíma voliteľný parameter 'reservation'
+  openForm(reservation?: Reservation) {
     if (this.roomsList.length === 0 || this.personsList.length === 0) {
-      alert('Cannot create reservation: You need at least one Room and one Guest created first.');
+      alert('Cannot create reservation: No rooms or guests available.');
       return;
     }
 
-    this.activeReservation = {
-      code: '',
-      roomId: this.roomsList[0].id, // Predvyberieme prvé
-      guestId: this.personsList[0].id, // Predvyberieme prvé
-      nights: 1,
-      party: '1 Adult'
-    };
+    if (reservation) {
+      // --- MÓD ÚPRAVY (CHANGE) ---
+      // Vyplníme formulár dátami z riadku
+      this.originalCode = reservation.code;
+      this.activeReservation = {
+        code: reservation.code,
+        roomId: reservation.room.id,
+        guestId: reservation.guest.id,
+        nights: reservation.nights,
+        party: reservation.party
+      };
+      // Hack: Aby sme vedeli, či editujeme, uložíme si príznak, alebo budeme kontrolovať existenciu kódu
+    } else {
+      // --- MÓD VYTVÁRANIA (NEW) ---
+      this.originalCode = null;
+
+      const firstAvailableRoom = this.roomsList.find(r => !r.isOccupied);
+      if (!firstAvailableRoom) {
+        alert('All rooms are currently occupied!');
+        return;
+      }
+      this.activeReservation = {
+        code: '',
+        roomId: firstAvailableRoom.id,
+        guestId: this.personsList[0].id,
+        nights: 1,
+        party: '1 Adult'
+      };
+    }
     this.viewMode.set('form');
   }
 
@@ -96,8 +121,6 @@ export default class Reservations {
   }
 
   saveReservation() {
-    // Pripravíme objekt pre backend
-    // Backend očakáva: { code, roomId, guestId, nights, party }
     const payload = {
       code: this.activeReservation.code,
       roomId: Number(this.activeReservation.roomId),
@@ -106,17 +129,30 @@ export default class Reservations {
       party: this.activeReservation.party
     };
 
-    // Vytvoríme (update zatiaľ neriešime)
-    this.reservationsService.createReservation(payload).subscribe({
-      next: () => {
-        this.loadData();
-        this.closeForm();
-      },
-      error: (err) => {
-        alert('Error creating reservation');
-        console.error(err);
-      }
-    });
+    if (this.originalCode) {
+      // --- UPDATE ---
+      // Posielame request na pôvodný kód (originalCode), ale s novými dátami (payload)
+      this.reservationsService.updateReservation(this.originalCode, payload).subscribe({
+        next: () => {
+          this.loadData();
+          this.closeForm();
+        },
+        error: (err) => console.error(err)
+      });
+    } else {
+      // --- CREATE ---
+      this.reservationsService.createReservation(payload).subscribe({
+        next: () => {
+          this.loadData();
+          this.closeForm();
+        },
+        error: (err) => {
+          // Pridajme aspon console log, aby sme videli chybu
+          console.error(err);
+          alert('Error creating reservation');
+        }
+      });
+    }
   }
 
   onRowAction(event: ActionEvent<Reservation>) {
@@ -124,6 +160,9 @@ export default class Reservations {
       if (confirm(`Delete reservation ${event.row.code}?`)) {
         this.reservationsService.deleteReservation(event.row.code).subscribe(() => this.loadData());
       }
+    } else if (event.type === ActionType.Change) {
+      // Zavoláme openForm s údajmi z riadku
+      this.openForm(event.row);
     }
   }
 }

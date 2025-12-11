@@ -114,16 +114,23 @@ export default class Rooms {
   // --- AKCIE Z TABUĽKY ---
 
   onRowAction(event: ActionEvent<Room>): void {
+    const room = event.row;
     switch (event.type) {
       case ActionType.Change:
-        // Kliknutie na Change -> Otvoríme formulár s dátami riadku
-        this.openForm(event.row);
+        if (room.isOccupied) {
+          alert('Unable to change occupied room! First, you must cancel the reservation.');
+          return; // Toto stopne vykonávanie funkcie, formulár sa neotvorí
+        }
+        // ---------------------
+
+        // Ak nie je obsadená, otvoríme formulár na úpravu
+        this.openForm(room);
         break;
 
       case ActionType.Delete:
         // Kliknutie na Delete -> Potvrdenie a výmaz
-        if (confirm(`Are you sure you want to delete room ${event.row.cislo}?`)) {
-          this.deleteRoom(event.row.id);
+        if (confirm(`Do you really want delete the room ${room.cislo}?`)) { // Upravil som id na cislo pre krajsi text
+          this.deleteRoom(room.id);
         }
         break;
     }

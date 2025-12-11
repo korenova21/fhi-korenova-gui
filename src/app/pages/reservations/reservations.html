@@ -21,20 +21,28 @@
     }
   } @else {
     <div class="p-3">
-      <h3>New Reservation</h3>
+      <h3>{{ originalCode ? 'Edit Reservation' : 'New Reservation' }}</h3>
       <form (ngSubmit)="saveReservation()">
 
         <div class="mb-3">
           <label class="form-label">Reservation Code</label>
-          <input type="text" class="form-control" [(ngModel)]="activeReservation.code" name="code" required>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="activeReservation.code"
+            name="code"
+            required
+            [disabled]="originalCode !== null"
+          >
         </div>
 
         <div class="mb-3">
           <label class="form-label">Select Room</label>
           <select class="form-select" [(ngModel)]="activeReservation.roomId" name="roomId" required>
             @for (room of roomsList; track room.id) {
-              <option [value]="room.id">
-                Room {{ room.cislo }} ({{ room.type }} - {{ room.price }}€)
+              <option [value]="room.id" [disabled]="room.isOccupied">
+                Room {{ room.cislo }} ({{ room.type }})
+                @if(room.isOccupied) { - OBSADENÁ } @else { - {{ room.price }}€ }
               </option>
             }
           </select>
