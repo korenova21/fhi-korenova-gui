@@ -3,12 +3,11 @@ import {PageTitle} from '../../components/page-title/page-title';
 import {Card} from '../../components/card/card';
 import {Table} from '../../components/table/table';
 import {Loader} from '../../components/loader/loader';
-import {FormsModule} from '@angular/forms'; // Potrebné pre formulár
+import {FormsModule} from '@angular/forms';
 import {PersonsService} from '../../services/persons.service';
 import {Person} from '../../models/person.model';
 import {Column} from '../../models/column.model';
 import {ActionEvent, ActionType} from '../../models/action.model';
-import {toSignal} from '@angular/core/rxjs-interop';
 import {take} from 'rxjs';
 
 @Component({
@@ -18,20 +17,19 @@ import {take} from 'rxjs';
     Card,
     Table,
     Loader,
-    FormsModule // Dôležité pre [(ngModel)]
+    FormsModule
   ],
   templateUrl: './guests.html',
 })
 export default class Guests {
   private personsService = inject(PersonsService);
 
-  // STAV STRÁNKY: 'table' alebo 'form'
+  // stav stranky
   viewMode = signal<'table' | 'form'>('table');
 
-  // DÁTA
+  // data
   persons: WritableSignal<Person[] | undefined> = signal(undefined);
 
-  // EDITOVANÝ OBJEKT (Ak je null, vytvárame nový)
   activePerson: Partial<Person> = {};
 
   columns: Column<Person>[] = [
@@ -57,17 +55,15 @@ export default class Guests {
     });
   }
 
-  // --- LOGIKA PREPÍNANIA ---
 
+//prepinanie
   openForm(existingPerson?: Person) {
     if (existingPerson) {
-      // Edit mode: skopírujeme dáta, aby sme nemenili tabuľku pri písaní
       this.activePerson = { ...existingPerson };
     } else {
-      // Create mode: prázdny objekt
       this.activePerson = { name: '', email: '' };
     }
-    this.viewMode.set('form'); // Prepne zobrazenie na formulár
+    this.viewMode.set('form');
   }
 
   closeForm() {
@@ -75,7 +71,7 @@ export default class Guests {
     this.activePerson = {};
   }
 
-  // --- ACTIONS (Backend volania) ---
+  // backend volania
 
   savePerson() {
     if (this.activePerson.id) {

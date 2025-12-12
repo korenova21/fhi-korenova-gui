@@ -4,5 +4,5 @@ export interface Room {
   type: 'single' | 'double' | 'suite'| 'deluxe';
   price: string;
   isOccupied: boolean;
-  capacity: string
+  capacity: number
 }

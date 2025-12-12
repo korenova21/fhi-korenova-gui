@@ -5,5 +5,5 @@ export interface Reservation {
   guest: Person;
   room: Room;
   nights: number;
-  party: string;
+  party: number;
 }

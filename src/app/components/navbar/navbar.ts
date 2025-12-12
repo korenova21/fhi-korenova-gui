@@ -16,7 +16,7 @@ export class Navbar {
   menuItems: MenuItem[] = [
     { label: 'Rooms', routerLink: 'rooms' },
     { label: 'Reservations', routerLink: 'reservations' },
-    { label: 'Guests', routerLink: 'guests' }, // <--- Tu musí byť 'guests', aby to sedelo s app.routes.ts
+    { label: 'Guests', routerLink: 'guests' }
   ];
 
 }

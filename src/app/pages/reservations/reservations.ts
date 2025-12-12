@@ -1,5 +1,5 @@
 import {Component, inject, signal, WritableSignal} from '@angular/core';
-import {FormsModule} from '@angular/forms'; // Dôležité
+import {FormsModule} from '@angular/forms';
 import {PageTitle} from '../../components/page-title/page-title';
 import {Card} from '../../components/card/card';
 import {Table} from '../../components/table/table';
@@ -9,8 +9,8 @@ import {Room} from '../../models/room.model';
 import {Person} from '../../models/person.model';
 import {Column} from '../../models/column.model';
 import {ReservationsService} from '../../services/reservations.service';
-import {RoomsService} from '../../services/rooms.service';     // <-- Potrebujeme načítať izby
-import {PersonsService} from '../../services/persons.service'; // <-- Potrebujeme načítať hostí
+import {RoomsService} from '../../services/rooms.service';
+import {PersonsService} from '../../services/persons.service';
 import {ActionEvent, ActionType} from '../../models/action.model';
 import {forkJoin} from 'rxjs';
 
@@ -27,15 +27,13 @@ export default class Reservations {
 
   viewMode = signal<'table' | 'form'>('table');
 
-  // Hlavné dáta
+  // hlavne data
   reservations: WritableSignal<Reservation[] | undefined> = signal(undefined);
 
-  // Zoznamy pre Dropdowny (Select)
   roomsList: Room[] = [];
   personsList: Person[] = [];
 
-  // Dáta formulára
-  // Ukladáme si ID vybranej izby a hosťa, nie celé objekty, aby sa to ľahšie posielalo
+  // data formulara
   activeReservation: any = {};
 
   originalCode: string | null = null;
@@ -51,7 +49,6 @@ export default class Reservations {
       actions: [
         { label: 'Change', type: ActionType.Change, cssClass: 'btn btn-sm btn-outline-primary me-1' },
         { label: 'Delete', type: ActionType.Delete, cssClass: 'btn btn-sm btn-outline-danger' }
-        // Change pre rezervácie zatiaľ vynecháme pre jednoduchosť, alebo dorobíme neskôr
       ]
     }
   ];
@@ -61,7 +58,6 @@ export default class Reservations {
   }
 
   loadData() {
-    // Načítame naraz Rezervácie, Izby aj Ľudí
     forkJoin({
       reservations: this.reservationsService.getReservations(),
       rooms: this.roomsService.getRooms(),
@@ -76,7 +72,6 @@ export default class Reservations {
     });
   }
 
-// Funkcia teraz prijíma voliteľný parameter 'reservation'
   openForm(reservation?: Reservation) {
     if (this.roomsList.length === 0 || this.personsList.length === 0) {
       alert('Cannot create reservation: No rooms or guests available.');
@@ -84,8 +79,6 @@ export default class Reservations {
     }
 
     if (reservation) {
-      // --- MÓD ÚPRAVY (CHANGE) ---
-      // Vyplníme formulár dátami z riadku
       this.originalCode = reservation.code;
       this.activeReservation = {
         code: reservation.code,
@@ -94,9 +87,8 @@ export default class Reservations {
         nights: reservation.nights,
         party: reservation.party
       };
-      // Hack: Aby sme vedeli, či editujeme, uložíme si príznak, alebo budeme kontrolovať existenciu kódu
+
     } else {
-      // --- MÓD VYTVÁRANIA (NEW) ---
       this.originalCode = null;
 
       const firstAvailableRoom = this.roomsList.find(r => !r.isOccupied);
@@ -109,7 +101,7 @@ export default class Reservations {
         roomId: firstAvailableRoom.id,
         guestId: this.personsList[0].id,
         nights: 1,
-        party: '1 Adult'
+        party: 1
       };
     }
     this.viewMode.set('form');
@@ -131,7 +123,6 @@ export default class Reservations {
 
     if (this.originalCode) {
       // --- UPDATE ---
-      // Posielame request na pôvodný kód (originalCode), ale s novými dátami (payload)
       this.reservationsService.updateReservation(this.originalCode, payload).subscribe({
         next: () => {
           this.loadData();
@@ -147,7 +138,6 @@ export default class Reservations {
           this.closeForm();
         },
         error: (err) => {
-          // Pridajme aspon console log, aby sme videli chybu
           console.error(err);
           alert('Error creating reservation');
         }
@@ -161,7 +151,6 @@ export default class Reservations {
         this.reservationsService.deleteReservation(event.row.code).subscribe(() => this.loadData());
       }
     } else if (event.type === ActionType.Change) {
-      // Zavoláme openForm s údajmi z riadku
       this.openForm(event.row);
     }
   }

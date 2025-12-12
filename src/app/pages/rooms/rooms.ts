@@ -1,5 +1,5 @@
 import {Component, inject, signal, WritableSignal} from '@angular/core';
-import {FormsModule} from '@angular/forms'; // Dôležité pre [(ngModel)]
+import {FormsModule} from '@angular/forms'; //
 import {PageTitle} from '../../components/page-title/page-title';
 import {Card} from '../../components/card/card';
 import {Table} from '../../components/table/table';
@@ -18,23 +18,23 @@ import {take} from 'rxjs';
     Card,
     Table,
     Loader,
-    FormsModule // Musí byť importované pre formuláre
+    FormsModule
   ],
   templateUrl: './rooms.html',
 })
 export default class Rooms {
   private roomsService = inject(RoomsService);
 
-  // 1. STAV STRÁNKY: 'table' (zoznam) alebo 'form' (pridanie/úprava)
+  // stav stranky
   viewMode = signal<'table' | 'form'>('table');
 
-  // 2. DÁTA IZIEB
+  // data
   rooms: WritableSignal<Room[] | undefined> = signal(undefined);
 
-  // 3. DÁTA PRE FORMULÁR (Ak je id undefined, vytvárame novú)
+  // data pre formular
   activeRoom: Partial<Room> = {};
 
-  // 4. DEFINÍCIA STĹPCOV
+  // definicia stlpcov
   columns: Column<Room>[] = [
     {name: '#', value: row => row.id},
     {name: 'Number', value: row => row.cislo},
@@ -55,52 +55,45 @@ export default class Rooms {
     this.loadData();
   }
 
-  // Načítanie dát z backendu
+  // nacitanie dat z backendu
   loadData() {
     this.roomsService.getRooms().pipe(take(1)).subscribe(data => {
       this.rooms.set(data);
     });
   }
 
-  // --- LOGIKA FORMULÁRA ---
-
-  // Otvorí formulár. Ak pošleme 'room', ideme editovať. Ak nie, vytvárame novú.
+  //formular
   openForm(existingRoom?: Room) {
     if (existingRoom) {
-      // Klonujeme objekt, aby sa zmeny neprejavili v tabuľke okamžite pri písaní
       this.activeRoom = { ...existingRoom };
     } else {
-      // Default hodnoty pre novú izbu
+      // default hodnoty pre novu izbu
       this.activeRoom = {
         cislo: '',
         type: 'single',
         price: '',
-        capacity: '1',
+        capacity: 1,
         isOccupied: false
       };
     }
-    this.viewMode.set('form'); // Prepne HTML na formulár
+    this.viewMode.set('form');
   }
 
-  // Zatvorí formulár a vráti sa na tabuľku
   closeForm() {
     this.viewMode.set('table');
-    this.activeRoom = {}; // Vyčistíme
+    this.activeRoom = {};
   }
 
-  // Uloženie (Create alebo Update)
   saveRoom() {
     if (this.activeRoom.id) {
-      // UPDATE: Ak máme ID, upravujeme existujúcu
       this.roomsService.updateRoom(this.activeRoom.id, this.activeRoom).subscribe({
         next: () => {
-          this.loadData(); // Obnovíme zoznam
-          this.closeForm(); // Zatvoríme formulár
+          this.loadData();
+          this.closeForm();
         },
         error: (err) => console.error('Update failed', err)
       });
     } else {
-      // CREATE: Ak nemáme ID, vytvárame novú
       this.roomsService.createRoom(this.activeRoom).subscribe({
         next: () => {
           this.loadData();
@@ -111,24 +104,19 @@ export default class Rooms {
     }
   }
 
-  // --- AKCIE Z TABUĽKY ---
-
+  // akcie tabulky
   onRowAction(event: ActionEvent<Room>): void {
     const room = event.row;
     switch (event.type) {
       case ActionType.Change:
         if (room.isOccupied) {
           alert('Unable to change occupied room! First, you must cancel the reservation.');
-          return; // Toto stopne vykonávanie funkcie, formulár sa neotvorí
+          return;
         }
-        // ---------------------
-
-        // Ak nie je obsadená, otvoríme formulár na úpravu
         this.openForm(room);
         break;
 
       case ActionType.Delete:
-        // Kliknutie na Delete -> Potvrdenie a výmaz
         if (confirm(`Do you really want delete the room ${room.cislo}?`)) { // Upravil som id na cislo pre krajsi text
           this.deleteRoom(room.id);
         }
@@ -139,7 +127,7 @@ export default class Rooms {
   private deleteRoom(id: number): void {
     this.roomsService.deleteRoom(id).subscribe({
       next: () => {
-        this.loadData(); // Obnovíme dáta
+        this.loadData();
       },
       error: (err) => {
         alert('Cannot delete room. It might have active reservations.');

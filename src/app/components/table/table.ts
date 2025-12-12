@@ -5,7 +5,7 @@ import {ActionEvent, ColumnAction} from '../../models/action.model'; // NOVÝ IM
 @Component({
   selector: 'app-table',
   imports: [],
-  standalone: true, // Predpokladám, že používaš standalone, ak nie, pridaj do NgModule
+  standalone: true,
   templateUrl: './table.html',
 })
 export class Table<T> {
@@ -13,10 +13,8 @@ export class Table<T> {
   rows = input.required<T[]>();
   columns = input.required<Column<T>[]>();
 
-  // NOVÉ: Definovanie eventu, ktorý sa odosiela pri kliknutí na akčné tlačidlo
   rowAction = output<ActionEvent<T>>();
 
-  // NOVÉ: Handler pre kliknutie na tlačidlo v riadku
   onActionClick(row: T, action: ColumnAction): void {
     this.rowAction.emit({
       type: action.type,

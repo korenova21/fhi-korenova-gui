@@ -28,7 +28,7 @@
     <div class="p-3">
       <h3>{{ activeRoom.id ? 'Edit Room' : 'Create New Room' }}</h3>
 
-      <form (ngSubmit)="saveRoom()">
+      <form #roomForm="ngForm" (ngSubmit)="saveRoom()">
 
         <div class="mb-3">
           <label class="form-label">Room Number</label>
@@ -57,7 +57,7 @@
 
         <div class="d-flex justify-content-end gap-2">
           <button type="button" class="btn btn-secondary" (click)="closeForm()">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Room</button>
+          <button type="submit" class="btn btn-primary" [disabled]="roomForm.invalid">Save Room</button>
         </div>
 
       </form>

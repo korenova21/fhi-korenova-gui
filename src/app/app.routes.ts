@@ -7,7 +7,7 @@ export const routes: Routes = [
   // Rezervácie
   {path: 'reservations', loadComponent: () => import('./pages/reservations/reservations')},
 
-  // Hostia (Toto je tá nová stránka)
+  // Hostia
   {path: 'guests', loadComponent: () => import('./pages/guests/guests')},
 
   // Presmerovanie a 404
