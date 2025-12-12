@@ -39,8 +39,13 @@ export default class Rooms {
     {name: '#', value: row => row.id},
     {name: 'Number', value: row => row.cislo},
     {name: 'Type', value: row => row.type},
-    {name: 'Price', value: row => row.price},
-    {name: 'Status', value: (room) => room.isOccupied ? 'Occupied' : 'Available' },
+    {name: 'Price(€)', value: row => row.price},
+    {name: 'Status',
+      isHtml: true, // 1. Povieme tabuľke: "Toto je HTML, nie text!"
+      value: (room) => room.isOccupied
+        ? '<span class="badge bg-danger">Occupied</span>'   // 2. HTML pre obsadenú
+        : '<span class="badge bg-success">Available</span>' // 3. HTML pre voľnú
+    },
     {name: 'Capacity', value: row => row.capacity},
     {
       name: 'Actions',

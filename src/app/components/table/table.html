@@ -12,7 +12,11 @@
         @for (column of columns(); track $index) {
           <td>
             @if (column.value) {
-              {{column.value(row)}}
+              @if (column.isHtml) {
+                <span [innerHTML]="column.value(row)"></span>
+              } @else {
+                {{column.value(row)}}
+              }
             }
             @else if (column.actions) {
               @for (action of column.actions; track action.type) {
@@ -29,7 +33,11 @@
         }
       </tr>
     } @empty {
-      No data available.
+      <tr>
+        <td [attr.colspan]="columns().length" class="text-center">
+          No data available.
+        </td>
+      </tr>
     }
   </tbody>
 </table>
